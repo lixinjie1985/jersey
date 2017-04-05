@@ -1,20 +1,20 @@
 package javax.ws.rs
 
-@ApplicationPathֻ������Application��������ϣ�ָ��һ��·������ΪӦ�ó���Ļ���·��
-@Path������Դ�����ķ����ϣ�ָ��һ��·�������ϵ�·���ͷ����ϵ�·�������������Դ·��
-@GET��@POST��@PUT��@DELETE��@HEAD��@OPTIONS�����󷽷�
-@Consumes���ܵ�ý�����ͣ�@Produces�����ý������
-@PathParam��·����һ���ְ󶨵��������������ֶΡ�@QueryParam�Ѳ�ѯ�ַ����󶨵��������������ֶΡ�@FormParam�ѱ����ֶΰ󶨵��������������ֶΡ�@MatrixParam��·���еľ�������󶨵��������������ֶ�
-@HeaderParam������ͷ�еĲ����󶨵��������������ֶΡ�@CookieParam��Cookie�еĲ����󶨵��������������ֶΡ�@BeanParam�൱�ڲ����ۺ������Ѷ����ͬ��Դ�Ĳ����ۼ���һ��bean�У��Ѹ�bean�󶨵��������������ֶ�
-@DefaultValue���������Ĭ��ֵ����û�б��ṩֵ��ʱ��ʹ�ã�Ĭ��û���ṩֵʱ����Ϊ�ա�����Ϊnull����������Ϊ��
+@ApplicationPath只能用在Application类的子类上，指定一个路径，作为应用程序的基本路径
+@Path用在资源类或类的方法上，指定一个路径，类上的路径和方法上的路径加起来组成资源路径
+@GET、@POST、@PUT、@DELETE、@HEAD、@OPTIONS是请求方法
+@Consumes接受的媒体类型，@Produces输出的媒体类型
+@PathParam把路径的一部分绑定到方法参数或类字段、@QueryParam把查询字符串绑定到方法参数或类字段、@FormParam把表单字段绑定到方法参数或类字段、@MatrixParam把路径中的矩阵参数绑定到方法参数或类字段
+@HeaderParam把请求头中的参数绑定到方法参数或类字段、@CookieParam把Cookie中的参数绑定到方法参数或类字段、@BeanParam相当于参数聚合器，把多个不同来源的参数聚集到一个bean中，把该bean绑定到方法参数或类字段
+@DefaultValue定义参数的默认值，在没有被提供值的时候使用，默认没有提供值时集合为空、对象为null、基本类型为零
 
 package javax.ws.rs.client
 
-ClientBuilder�࣬����֤�顢��ȫ�׽��ֻ��������ù����һ��Client�ӿ�ʵ��
-Client�ӿڣ�����һ�����ӹ����һ��WebTarget�ӿ�ʵ����Invocation.Builder�ӿ�ʵ��
-WebTarget�ӿڣ���ʾһ��·��ָ������Դ�����·���а�������ռλ�������Ļ����Խ����滻��������׷��·�����֣��������Ӳ�ѯ�ַ������������Ӿ��������������һ��Invocation.Builder�ӿ�ʵ��
-Invocation.Builder�ӿڣ���ʾ��һ������Ĺ��죬��������header��cookie��cache�����롢���ԡ�ý�����ͼ��������ԣ�������һ��Invocation�ӿ�ʵ��
-Invocation�ӿڣ���ʾһ�ε��ã������������ԣ�Ȼ�����ͬ�����첽���ã�����ȡ��Ӧ
-SyncInvoker�ӿڣ�ͬ����������ִ��һ��ͬ�����ã�����ȡ���
-AsyncInvoker�ӿڣ��첽��������ִ��һ���첽���ã�����ȡ���
-InvocationCallback<R>�ӿڣ��ص��ӿڣ����첽���ô��������У����Խ����¼�֪ͨ
+ClientBuilder类，基于证书、安全套接字或其它配置构造出一个Client接口实例
+Client接口，根据一个链接构造出一个WebTarget接口实例或Invocation.Builder接口实例
+WebTarget接口，表示一个路径指定的资源，如果路径中包含类似占位符参数的话可以进行替换，还可以追加路径部分，可以添加查询字符串，可以添加矩阵参数，最后构造出一个Invocation.Builder接口实例
+Invocation.Builder接口，表示对一个请求的构造，可以设置header、cookie、cache、编码、语言、媒体类型及其它属性，最后构造出一个Invocation接口实例
+Invocation接口，表示一次调用，可以设置属性，然后进行同步或异步调用，并获取响应
+SyncInvoker接口，同步调用器，执行一次同步调用，并获取结果
+AsyncInvoker接口，异步调用器，执行一次异步调用，并获取结果
+InvocationCallback<R>接口，回调接口，在异步调用处理过程中，可以接受事件通知
