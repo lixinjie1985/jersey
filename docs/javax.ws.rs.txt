@@ -35,7 +35,49 @@ ResourceContext接口，资源上下文，提供对资源类实例的访问，�
 ResourceInfo接口，资源信息，该接口可以被注入，来访问当前请求匹配的资源类和方法，如果没有匹配的就返回null，包含获取资源类和获取资源方法两个方法
 @Suspended注解，挂起，注入一个挂起的AsyncResponse对象到资源或子资源方法参数，该AsyncResponse对象被绑定到激活请求的处理，当响应可得时可被用于恢复该请求的处理，默认没有挂起超时时间，是无限挂起的，不过可以通过编码的方式设置超时时间和超时处理器
 AsyncResponse接口，异步响应，该接口可被注入资源或子资源方法参数中，提供异步服务器端响应处理的方式。每个异步响应实例绑定到正在运行的请求，可以被用于异步地提供请求处理结果或者操作挂起的客户端连接
+TimeoutHandler接口，超时处理器，只有一个处理超时方法，在挂起的异步响应即将超时时调用，超时的默认结果是503服务不可用，可以通过该接口来更改，1)使用自定义的响应来恢复该挂起的异步响应，2)取消该异步响应，3)重新设置超时时间来继续保持挂起
+CompletionCallback接口，请求处理完成回调接口，只有一个已完成方法，在请求处理完成且响应已发送至客户端后调用，或有未映射的异常传播到宿主容器时调用
+ConnectionCallback接口，异步请求处理时和连接有关的回调接口，只有一个连接断开方法，在容器检测到远程客户端和该异步处理的连接已经断开后调用
+DynamicFeature接口，动态注册匹配之后的特性，包含一个配置方法，在应用部署时被调用，注册provider实例或Class<?>，应用于已经匹配的资源类和方法，能够重写基于注解的任何绑定定义
 
+package javax.ws.rs.ext
+
+@Provider注解，标明一个实现类在运行时扫描阶段应该作为一个provider被发现
+@ParamConverter.Lazy注解，标明代理给转换器的转换应该被延迟，仅在真正需要值的时候才进行转换
+ParamConverter<T>接口，参数转换器，用于字符串形式表示的参数值和相应自定义java类型之间的转换，默认情况下会积极转换资源方法中的默认参数值，这样在部署时就可以尽早发现错误而不用等到运行时。要改变这种情况可以使用@ParamConverter.Lazy注解来延迟转换
+ParamConverterProvider接口，参数转换器提供者，只有一个方法，根据类型信息获取一个参数转换器用于转换
+MessageBodyReader<T>接口，消息体读取器，用于输入流到java类型的转换，包括两个方法，一个用于测试读取器是否支持某个java类型的读取，一个用于从输入流中读取数据转换为某个java类型对象，类似反序列化
+MessageBodyWriter<T>接口，消息体写入器，用于java类型到输出流的转换，包含两个方法，一个用于测试写入器是否支持某个java类型的写入，一个用于把某个java类型的对象以字节的形式写入输出流，类似序列化
+ReaderInterceptor接口，读取器拦截器，包装在对MessageBodyReader.readFrom(...)方法调用的周围，就像过滤器和servlet的关系
+ReaderInterceptorContext接口，读取器拦截器上下文，可以获取相关参数信息，并调用拦截器链中的下一个拦截器，在链的最后调用读取器
+WriterInterceptor接口，写入器拦截器，包装在对MessageBodyWriter.writeTo(...)方法调用的周围，就像过滤器和servlet的关系
+WriterInterceptorContext接口，写入器拦截器上下文，可以获取相关参数信息，并调用拦截器链中的下一个拦截器，在链的最后调用写入器
+RuntimeDelegate.HeaderDelegate<T>接口，用于字符串形式表示的http header和相应JAX-RS类型之间的转换
+ExceptionMapper<E extends Throwable>接口，定义从java异常到http响应之间的映射
+ContextResolver<T>接口，上下文解析器，为资源类和其它的provider提供上下文信息
+
+package javax.ws.rs.core
+
+@Context注解，用来注入信息到字段，属性，方法参数
+Response.Status枚举，表示http的所有结果类型
+Response.Status.Family枚举，表示http的结果类型的大分类，1xx，2xx，3xx，4xx，5xx
+UriInfo接口，可以被注入，提供对应用程序和请求URI信息的访问
+HttpHeaders接口，可以被注入，提供对http header信息的访问
+MultivaluedMap<K,V>接口，继承了Map<K,List<V>>接口，一个key对应多个值
+PathSegment接口，表示一个URI路径片段和相关的矩阵参数，默认会自动解码，使用@Encoded注解将禁用自动解码，返回已编码的形式
+@Response.StatusType接口，表示响应的结果状态，包含状态代码，状态短语，大的分类
+StreamingOutput接口，可以作为资源方法的返回值，或作为响应的实体当应用希望流式输出时，是MessageBodyWriter<T>的可选的轻量级替代方案
+Link.Builder接口，超链接构建器
+Configuration接口，与一个可配置的JAX-RS上下文关联的配置状态，可以获取或检测一些配置信息
+Configurable<C extends Configurable>接口，表示客户端或服务器端可配置的JAX-RS上下文，可以用来添加属性和注册组件
+Feature接口，只包含一个配置方法，在运行时这个feature即将启动时调用，进一步提供一些额外的运行时配置
+FeatureContext接口，feature上下文，用来进行组件注册等相关配置
+Application类，定义JAX-RS应用的组件和提供额外的元数据，可以使用@Context注解注入该类
+Form类，采用application/x-www-form-urlencoded内容类型时，表示html的表单数据，可以读取和添加表单数据
+GenericEntity<T>类，泛型实体，用来保存泛型类型（因为泛型会在运行时被擦除），根据泛型类型选择合适的MessageBodyWriter<T>来写入实体
+UriBuilder类，URI模板感知的工具类，用来从组件构建URI
+Response类，应用程序使用该类的实例向运行时提供元数据
+Response.ResponseBuilder类，用来构建Response实例
 
 
 
