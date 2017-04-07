@@ -1,0 +1,54 @@
+Chapter 3. JAX-RS Application, Resources and Sub-Resources
+
+根资源类，普通的java类使用@Path注解标注，且至少有一个方法也使用@Path注解标注或使用@GET, @PUT, @POST, @DELETE注解标注。使用@GET, @PUT, @POST, @DELETE注解标注的方法称为资源方法
+资源方法的参数类型，基本类型，带有一个只接收一个字符串的构造函数的类型，有一个名为valueOf或fromString的且只接收一个字符串的静态方法类型，可以使用javax.ws.rs.ext.ParamConverter转换的java类型，List<T>、Set<T>或SortedSet<T>且泛型T满足前面第二个和第三个的集合类型，该集合类型是只读的
+
+子资源，@Path注解也可以用在根资源类的方法上，这样可以把一些资源打包在一起，可以进行潜在的重用
+第一种方式，@Path注解可以用在资源方法上（和@GET, @PUT, @POST, @DELETE一起使用），这些方法称为子资源方法。类上的@Path注解和方法上的@Path注解合起来参与路径匹配
+第二种方式，@Path注解可以用在非资源方法上（不和@GET, @PUT, @POST, @DELETE一起使用），这些方法称为子资源定位器。类上的@Path注解和方法上的@Path注解合起来参与路径匹配，当方法上的@Path注解是@Path("/")或@Path("")时，意味着子资源定位器可以匹配到类上的资源路径。子资源定位器返回的资源类实例是在运行时执行的，因此可以支持多态行为，根据请求返回资源类的不同的子类型。因为返回的是资源类的实例对象，所以运行时无法管理它的生命周期和字段注入。如果要让运行时管理这些，子资源定位器方法不能返回实例而应返回资源类的Class<?>。默认资源类的生命周期是每个请求范围的，可以在资源类上使用@javax.inject.Singleton注解变成单例。子资源定位器方法也可以返回一个编程的资源模型（Chapter 14）
+
+根资源类的生命周期，@org.glassfish.jersey.process.internal.RequestScoped请求范围，@org.glassfish.hk2.api.PerLookup每次需要（一个请求范围内可能多次），@javax.inject.Singleton单例。默认是请求范围
+
+Chapter 4. Application Deployment and Runtime Environments
+
+支持多种不同的服务器端环境，从轻量级的http容器到完全的java ee服务器，应用的发布方式取决于服务器端运行环境
+JAX-RS提供了一个不需要知道部署的抽象类Application可以声明资源类和provider类，资源类和provider类的单例实例。可选地也可以使用jersey的ResourceConfig类（它继承了Application），可以直接实例化和配置，也可以继承它，在构造函数里放置配置代码。可以手动注册资源类或通过包扫描自动添加，包扫描不支持继承，因此@Path注解放到父类或接口上会被忽略，应放到具体类上
+
+自动发现的Feature，默认classpath上的feature不会自动隐式的被发现和注册，必须显式使用Application的子类注册。只有很少的几个jersey模块提供了自动发现注册功能
+
+配置类路径扫描，jersey采用Java Service Provider的机制来获取服务的实现类，它会扫描全部类路径来找到合适的META-INF/services/文件。由于扫描会增加启动时间，也可以禁用扫描而采用Application子类代码手动注册所有的服务实现类。具体做法可以使用ResourceConfig类的实例注册或继承该类并在构造函数中注册
+
+java se部署环境，基于java的http服务器，极简化和灵活的jersey部署，通常可以嵌入到其它应用里，通过代码启动和配置。支持JDK Http Server，Grizzly HTTP Server，Simple server，Jetty HTTP Server，Netty HTTP Server，
+
+基于Servlet 2.5的部署环境，jersey和servlet容器集成，可以在web.xml文件中以servlet或filter的方式配置和设置它所拦截的路径模式，关于资源类的配置有三种方式，1)以javax.ws.rs.Application为参数名配置一个Application子类（该子类里注册了资源类）2)以jersey.config.server.provider.packages为参数名配置多个资源类所在包（逗号分隔），以jersey.config.server.provider.scanning.recursive为参数名配置是否递归扫描3)以jersey.config.server.provider.classnames为参数名配置多个资源类完整名称（逗号分隔）
+
+Servlet 3.x容器，简单的部署可以不使用web.xml文件，使用@ApplicationPath注解在Application的子类上，指定应用的基路径。复杂的部署可以使用web.xml，如果定义了Application子类，则用该子类全名作为servlet-name配置url映射，如果没有子类，则用javax.ws.rs.core.Application作为servlet-name配置url映射（此时通过扫描类路径来发现注册资源类和provider类）。此时只配置映射而没有配置servlet，因为jersey会自己添加servlet的配置
+
+Chapter 7. Representations and Responses
+
+展现和java类型，一个request的body部分也叫做展现或实体。带有注解的方法参数是从请求中抽取参数，不带注解的方法参数是一个实体。最多只能有一个这样不带注解的方法参数存在，因为一个request中最多发送一个这样的展现或实体
+
+构建响应，有时需要为一个请求提供额外的响应信息，这时请使用Response类来构建和返回
+
+java异常到http错误响应的映射，可以抛出一个继承了WebApplicationException的异常，异常信息会直接转化为http相对应的错误响应。也可以使用一个异常映射ExceptionMapper<E extends Throwable>，把一个已经存在的异常映射到一个特定的http错误响应。自定义异常映射可以实现org.glassfish.jersey.spi.ExtendedExceptionMapper接口，包含一个检测方法来确定是否可以映射某个异常，不能映射的话就让其它实现类来映射
+
+有条件的GET，可以减少带宽和提高服务器端性能，取决于如何根据信息计算条件是否改变，一般对于许多静态资源应返回304（没有修改）这样的响应
+
+Chapter 8. JAX-RS Entity Providers
+
+jersey根据输入展现信息，可以把输入数据反序列化为java类型的对象供资源方法使用。同样，由资源方法返回的java类型的对象，jersey根据输出展现信息，可以把该对象序列化，然后写入输出流。jersey只能完成非常普通的java类型转换，MessageBodyReader<T>接口可以完成输入实体展现到java类型对象的反序列化，MessageBodyWriter<T>接口可以完成java类型对象到输出实体展现的序列化
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
