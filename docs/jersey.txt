@@ -38,17 +38,17 @@ Chapter 8. JAX-RS Entity Providers
 
 jersey根据输入展现信息，可以把输入数据反序列化为java类型的对象供资源方法使用。同样，由资源方法返回的java类型的对象，jersey根据输出展现信息，可以把该对象序列化，然后写入输出流。jersey只能完成非常普通的java类型转换，MessageBodyReader<T>接口可以完成输入实体展现到java类型对象的反序列化，MessageBodyWriter<T>接口可以完成java类型对象到输出实体展现的序列化
 
+如果支持给定的java类型则isWriteable方法返回true，判断基于java类型，泛型类型，还有类型上带的注解，展现媒体类型，这里的注解和资源方法关联和或java类型关联。writeTo方法的参数和上一个方法的含义一样，除此之外还有和输出相关的 httpHeaders，且可以修改，还有一个java类型的对象表示实体对象，还有一个输出流用于写入，注意不要关闭输出流，jersey会帮我们关闭，getSize方法已废弃
 
+isReadable方法对于支持的java类型应该返回true，注解和资源方法里的java类型的参数关联，而不是和该java类型关联，readFrom方法从输入流读取数据转化为java类型对象，输入流不要关闭，jersey会帮我们关闭
 
+通常会注册很多Entity Provider，根据java类型和线上的媒体类型选出若干候选项，然后调用它们的isReadable或isWriteable方法，第一个返回true就被选择
 
+MessageBodyWriter<T>选择算法，首先找出java类型，然后找出媒体类型，然后筛选出支持它们的候选项，然后按照java类型第一媒体类型第二的方式排序，然后再调用方法检测是否返回true
 
+MessageBodyReader<T>选择算法，首先找出媒体类型，如果从请求中无法得知则算作是application/octet-stream，然后确定java类型，服务器端就是资源方法的java类型参数的类型，客户端的话就是传递给readFrom方法的Class<?>，然后按照媒体类型筛选出候选项，然后再调用方法检测是否返回true
 
-
-
-
-
-
-
+为了简化使用，jersey定了MessageBodyWorkers接口，可以通过@Context注解来注入该接口，该接口可以选择最合适的entity provider来使用
 
 
 
