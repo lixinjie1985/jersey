@@ -101,8 +101,8 @@ Chapter 11. Asynchronous Services and Clients
 
 服务器端可以分块输出，客户端使用ChunkedInput<T>来实现分块输入，使用GenericEntity<T>类型来保存泛型信息，在运行时使用，因为java的泛型在运行时会被擦除。服务器端发完关闭连接后，客户端会收到null表明没有了。客户端在以字节流的形式读取块数据时，无法分辨出块的边界，为了实现自定义边界，可以注册ChunkParser，用来读取块，并区分它们，jersey已经提供了几种实现，自己也可以实现，默认是以出现\r\n作为分隔符的。进来的数据现有ChunkParser读取，然后再由MessageBodyReader<T>转化为java对象，可以给chunk定义媒体类型来选择合适的MessageBodyReader<T>完成反序列化
 
+Chapter 14. Programmatic API for Building Resources
 
-
-
+通常资源类和资源方法都是已经写好的静态内容，还可以已编程的方式在运行时动态模拟构建资源类和资源方法来响应客户端的请求
 
 
