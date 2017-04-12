@@ -97,8 +97,9 @@ Chapter 11. Asynchronous Services and Clients
 
 分块输出，可以把响应分成多个独立的块分别发送给客户端，当服务器端一个块形成后立即发给客户端而不用等下一个块，响应实体在块里被发送，客户端知道响应将要被分块，所以单独读取每个响应块，并处理它，继续在同一个连接上等待更多的块到来，当服务器发送完所有块后可以关闭连接，从资源方法返回ChunkedOutput对象表明响应是分块输出的，且是异步执行的，可以从不同的线程里使用该ChunkedOutput对象往客户端写分块数据，全部写完后要显式调用关闭。ChunkedOutput对象可以在不同的请求线程间传递，一个请求返回ChunkedOutput对象，另一个请求使用该ChunkedOutput对象往客户端写数据
 
+客户端API也支持异步处理，返回一个Future<Response>对象，使用AsyncInvoker对象进行调用。客户端也可以注册异步回调，使用InvocationCallback<RESPONSE>接口，completed方法当调用成功完成时执行，响应会被传进来， failed在调用失败时执行，异常会被传进来，当泛型类型是Response时，failed只在由于客户端处理错误而引起的调用失败时才执行，当泛型类型是其它时，只要服务器端返回的不是2xx，failed就会执行，因为此时客户端无法获取服务器端返回的错误码信息。泛型可以直接设置成期望的java类型
 
-
+服务器端可以分块输出，客户端使用ChunkedInput<T>来实现分块输入，使用GenericEntity<T>类型来保存泛型信息，在运行时使用，因为java的泛型在运行时会被擦除。服务器端发完关闭连接后，客户端会收到null表明没有了。客户端在以字节流的形式读取块数据时，无法分辨出块的边界，为了实现自定义边界，可以注册ChunkParser，用来读取块，并区分它们，jersey已经提供了几种实现，自己也可以实现，默认是以出现\r\n作为分隔符的。进来的数据现有ChunkParser读取，然后再由MessageBodyReader<T>转化为java对象，可以给chunk定义媒体类型来选择合适的MessageBodyReader<T>完成反序列化
 
 
 
