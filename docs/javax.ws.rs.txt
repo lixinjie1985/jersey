@@ -4,15 +4,18 @@ package javax.ws.rs
 @Path用在资源类或类的方法上，指定一个路径，类上的路径和方法上的路径加起来组成资源路径
 @GET、@POST、@PUT、@DELETE、@HEAD、@OPTIONS是请求方法
 @Consumes接受的媒体类型，@Produces输出的媒体类型
-@PathParam把路径的一部分绑定到方法参数或类字段、@QueryParam把查询字符串绑定到方法参数或类字段、@FormParam把表单字段绑定到方法参数或类字段、@MatrixParam把路径中的矩阵参数绑定到方法参数或类字段
-@HeaderParam把请求头中的参数绑定到方法参数或类字段、@CookieParam把Cookie中的参数绑定到方法参数或类字段、@BeanParam相当于参数聚合器，把多个不同来源的参数聚集到一个bean中，把该bean绑定到方法参数或类字段
+@PathParam把路径的一部分绑定到方法参数或类字段、@QueryParam把查询字符串绑定到方法参数或类字段、@FormParam把表单字段绑定到方法参数或类字段、
+@MatrixParam把路径中的矩阵参数绑定到方法参数或类字段
+@HeaderParam把请求头中的参数绑定到方法参数或类字段、@CookieParam把Cookie中的参数绑定到方法参数或类字段、@BeanParam相当于参数聚合器，
+把多个不同来源的参数聚集到一个bean中，把该bean绑定到方法参数或类字段
 @DefaultValue定义参数的默认值，在没有被提供值的时候使用，默认没有提供值时集合为空、对象为null、基本类型为零
 
 package javax.ws.rs.client
 
 ClientBuilder类，基于证书、安全套接字或其它配置构造出一个Client接口实例
 Client接口，根据一个链接构造出一个WebTarget接口实例或Invocation.Builder接口实例
-WebTarget接口，表示一个路径指定的资源，如果路径中包含类似占位符参数的话可以进行替换，还可以追加路径部分，可以添加查询字符串，可以添加矩阵参数，最后构造出一个Invocation.Builder接口实例
+WebTarget接口，表示一个路径指定的资源，如果路径中包含类似占位符参数的话可以进行替换，还可以追加路径部分，可以添加查询字符串，可以添加矩阵参数，
+最后构造出一个Invocation.Builder接口实例
 Invocation.Builder接口，表示对一个请求的构造，可以设置header、cookie、cache、编码、语言、媒体类型及其它属性，最后构造出一个Invocation接口实例
 Invocation接口，表示一次调用，可以设置属性，然后进行同步或异步调用，并获取响应
 SyncInvoker接口，同步调用器，执行一次同步调用，并获取结果
@@ -26,28 +29,38 @@ Entity<T>类，封装消息实体，实体数据，编码，媒体类型等
 
 package  javax.ws.rs.container
 
-PreMatching注解，用于容器请求过滤器，应用于全局资源，在进来的请求匹配到一个特别的资源方法前调用，匹配之前过滤，会忽略@NameBinding注解
-ContainerRequestFilter接口，容器请求过滤器，在没有使用@NameBinding注解时，是全局应用的，在进来的请求匹配之后执行，使用了@NameBinding注解时，只能用于匹配相同绑定的资源或子资源方法，也是匹配之后执行，要想在匹配前执行使用@PreMatching注解，匹配前过滤通常用于更新匹配算法，修改请求信息或返回缓存响应，否则推荐使用匹配后过滤。只有一个过滤方法
+@PreMatching注解，用于容器请求过滤器，应用于全局资源，在进来的请求匹配到一个特别的资源方法前调用，匹配之前过滤，会忽略@NameBinding注解
+ContainerRequestFilter接口，容器请求过滤器，在没有使用@NameBinding注解时，是全局应用的，在进来的请求匹配之后执行，使用了@NameBinding注解时，
+只能用于匹配相同绑定的资源或子资源方法，也是匹配之后执行，要想在匹配前执行使用@PreMatching注解，匹配前过滤通常用于更新匹配算法，
+修改请求信息或返回缓存响应，否则推荐使用匹配后过滤。只有一个过滤方法
 ContainerRequestContext接口，容器请求过滤器上下文，可以获取或修改请求相关信息，可以中止请求
-ContainerResponseFilter接口，容器响应过滤器，没有使用@NameBinding注解时，是全局过滤器，使用了@NameBinding注解时，只能过滤匹配的资源和子资源方法，只有一个过滤方法，在响应被提供后调用
+ContainerResponseFilter接口，容器响应过滤器，没有使用@NameBinding注解时，是全局过滤器，使用了@NameBinding注解时，只能过滤匹配的资源和子资源方法，
+只有一个过滤方法，在响应被提供后调用
 ContainerResponseContext接口，容器响应上下文，可以获取或修改与响应有关的信息
 ResourceContext接口，资源上下文，提供对资源类实例的访问，包含初始化资源实例和获得资源实例两个方法，可以使用@Context注解注入该接口
 ResourceInfo接口，资源信息，该接口可以被注入，来访问当前请求匹配的资源类和方法，如果没有匹配的就返回null，包含获取资源类和获取资源方法两个方法
-@Suspended注解，挂起，注入一个挂起的AsyncResponse对象到资源或子资源方法参数，该AsyncResponse对象被绑定到激活请求的处理，当响应可得时可被用于恢复该请求的处理，默认没有挂起超时时间，是无限挂起的，不过可以通过编码的方式设置超时时间和超时处理器
-AsyncResponse接口，异步响应，该接口可被注入资源或子资源方法参数中，提供异步服务器端响应处理的方式。每个异步响应实例绑定到正在运行的请求，可以被用于异步地提供请求处理结果或者操作挂起的客户端连接
-TimeoutHandler接口，超时处理器，只有一个处理超时方法，在挂起的异步响应即将超时时调用，超时的默认结果是503服务不可用，可以通过该接口来更改，1)使用自定义的响应来恢复该挂起的异步响应，2)取消该异步响应，3)重新设置超时时间来继续保持挂起
+@Suspended注解，挂起，注入一个挂起的AsyncResponse对象到资源或子资源方法参数，该AsyncResponse对象被绑定到激活请求的处理，
+当响应可得时可被用于恢复该请求的处理，默认没有挂起超时时间，是无限挂起的，不过可以通过编码的方式设置超时时间和超时处理器
+AsyncResponse接口，异步响应，该接口可被注入资源或子资源方法参数中，提供异步服务器端响应处理的方式。每个异步响应实例绑定到正在运行的请求，
+可以被用于异步地提供请求处理结果或者操作挂起的客户端连接
+TimeoutHandler接口，超时处理器，只有一个处理超时方法，在挂起的异步响应即将超时时调用，超时的默认结果是503服务不可用，可以通过该接口来更改，
+1)使用自定义的响应来恢复该挂起的异步响应，2)取消该异步响应，3)重新设置超时时间来继续保持挂起
 CompletionCallback接口，请求处理完成回调接口，只有一个已完成方法，在请求处理完成且响应已发送至客户端后调用，或有未映射的异常传播到宿主容器时调用
 ConnectionCallback接口，异步请求处理时和连接有关的回调接口，只有一个连接断开方法，在容器检测到远程客户端和该异步处理的连接已经断开后调用
-DynamicFeature接口，动态注册匹配之后的特性，包含一个配置方法，在应用部署时被调用，注册provider实例或Class<?>，应用于已经匹配的资源类和方法，能够重写基于注解的任何绑定定义
+DynamicFeature接口，动态注册匹配之后的特性，包含一个配置方法，在应用部署时被调用，注册provider实例或Class<?>，应用于已经匹配的资源类和方法，
+能够重写基于注解的任何绑定定义
 
 package javax.ws.rs.ext
 
 @Provider注解，标明一个实现类在运行时扫描阶段应该作为一个provider被发现
 @ParamConverter.Lazy注解，标明代理给转换器的转换应该被延迟，仅在真正需要值的时候才进行转换
-ParamConverter<T>接口，参数转换器，用于字符串形式表示的参数值和相应自定义java类型之间的转换，默认情况下会积极转换资源方法中的默认参数值，这样在部署时就可以尽早发现错误而不用等到运行时。要改变这种情况可以使用@ParamConverter.Lazy注解来延迟转换
+ParamConverter<T>接口，参数转换器，用于字符串形式表示的参数值和相应自定义java类型之间的转换，默认情况下会积极转换资源方法中的默认参数值，
+这样在部署时就可以尽早发现错误而不用等到运行时。要改变这种情况可以使用@ParamConverter.Lazy注解来延迟转换
 ParamConverterProvider接口，参数转换器提供者，只有一个方法，根据类型信息获取一个参数转换器用于转换
-MessageBodyReader<T>接口，消息体读取器，用于输入流到java类型的转换，包括两个方法，一个用于测试读取器是否支持某个java类型的读取，一个用于从输入流中读取数据转换为某个java类型对象，类似反序列化
-MessageBodyWriter<T>接口，消息体写入器，用于java类型到输出流的转换，包含两个方法，一个用于测试写入器是否支持某个java类型的写入，一个用于把某个java类型的对象以字节的形式写入输出流，类似序列化
+MessageBodyReader<T>接口，消息体读取器，用于输入流到java类型的转换，包括两个方法，一个用于测试读取器是否支持某个java类型的读取，
+一个用于从输入流中读取数据转换为某个java类型对象，类似反序列化
+MessageBodyWriter<T>接口，消息体写入器，用于java类型到输出流的转换，包含两个方法，一个用于测试写入器是否支持某个java类型的写入，
+一个用于把某个java类型的对象以字节的形式写入输出流，类似序列化
 ReaderInterceptor接口，读取器拦截器，包装在对MessageBodyReader.readFrom(...)方法调用的周围，就像过滤器和servlet的关系
 ReaderInterceptorContext接口，读取器拦截器上下文，可以获取相关参数信息，并调用拦截器链中的下一个拦截器，在链的最后调用读取器
 WriterInterceptor接口，写入器拦截器，包装在对MessageBodyWriter.writeTo(...)方法调用的周围，就像过滤器和servlet的关系
@@ -78,20 +91,4 @@ GenericEntity<T>类，泛型实体，用来保存泛型类型（因为泛型会�
 UriBuilder类，URI模板感知的工具类，用来从组件构建URI
 Response类，应用程序使用该类的实例向运行时提供元数据
 Response.ResponseBuilder类，用来构建Response实例
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
